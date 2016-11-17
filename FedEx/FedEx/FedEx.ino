@@ -44,16 +44,23 @@ void setup() {
 	buzzer.tone(1000, 200);
 	led.setColorAt(0, 255, 0, 0);
 	led.setColorAt(1, 255, 0, 0);
+	led.show();
 }
 
 
 // the loop function runs over and over again until power down or reset
 void loop() {
 
+	startButton();
+
+	while (true) {
+		//ledExample();
+		irMovement();
+		doNotCrash();
+	}
+
 	//buttonExample();
 	//lineFinderExample();
-	//irMovement();
-	//doNotCrash();
   
 }
 
@@ -320,16 +327,19 @@ void doNotCrash()
 
 void startButton() {
 
-	while (!analogRead(7) < 100) {
+	while (analogRead(7) > 100) {
 		delay(50);
 		Serial.print("Button Not Pressed");
 	}
 
 	Serial.print("Button Pressed");
 
+	led.setColorAt(0, 0, 255, 0);
+	led.setColorAt(1, 0, 255, 0);
+	led.show();
+	delay(5000);
+
 	led.setColorAt(0, 0, 0, 255);
 	led.setColorAt(1, 0, 0, 255);
 	led.show();
-	delay(500);
-
 }
