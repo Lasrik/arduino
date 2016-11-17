@@ -30,9 +30,9 @@ int runSpeed = 100;
 
 uint8_t direction = M_STOP;
 
-#define cornerQuotient 2
+#define cornerQuotient 10
 
-
+int lineFollowFlag = 10;
 
 void setup() {
 	led.setpin(13);
@@ -55,7 +55,9 @@ void loop() {
 
 	while (true) {
 		//ledExample();
-		irMovement();
+		//irMovement();
+		
+		followTheLine();
 		doNotCrash();
 	}
 
@@ -311,7 +313,7 @@ void left()
 
 void doNotCrash()
 {
-	if (direction == M_FORWARD && ultrasonic.distanceCm() < 5)
+	if (direction == M_FORWARD && ultrasonic.distanceCm() < 7)
 	{
 		stop();
 		left();
@@ -334,12 +336,51 @@ void startButton() {
 
 	Serial.print("Button Pressed");
 
-	led.setColorAt(0, 0, 255, 0);
-	led.setColorAt(1, 0, 255, 0);
-	led.show();
-	delay(5000);
+	for (int i = 0; i< 5; i++){
+		led.setColorAt(0, 0, 255, 0);
+		led.setColorAt(1, 0, 255, 0);
+		led.show();
+		delay(800);
+		led.setColorAt(0, 0, 0, 0);
+		led.setColorAt(1, 0, 0, 0);
+		led.show();
+		buzzer.tone(1000, 200);
+	}
 
 	led.setColorAt(0, 0, 0, 255);
 	led.setColorAt(1, 0, 0, 255);
 	led.show();
+}
+
+
+void followTheLine()
+{
+	uint8_t val;
+
+	val = lineFinder.readSensors();
+
+	switch (val) {
+
+	case S1_IN_S2_IN:
+		forward();
+		lineFollowFlag = 10;
+		break;
+
+	case S1_IN_S2_OUT:
+		forward();
+		if (lineFollowFlag > 1) lineFollowFlag--;
+		break;
+
+	case S1_OUT_S2_IN:
+		forward();
+		if (lineFollowFlag < 20) lineFollowFlag++;
+		break;
+
+	case S1_OUT_S2_OUT:
+		if (lineFollowFlag == 10) backward();
+		if (lineFollowFlag < 10) left();
+		if (lineFollowFlag > 10) right();
+		break;
+
+	}
 }
