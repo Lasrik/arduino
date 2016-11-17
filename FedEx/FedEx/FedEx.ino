@@ -22,7 +22,7 @@ MeUltrasonicSensor ultrasonic(PORT_3);
 
 MeIR ir;
 
-int runSpeed = 170;
+int runSpeed = 50;
 
 #define M_FORWARD 1
 #define M_BACKWARD 2
@@ -30,9 +30,11 @@ int runSpeed = 170;
 
 uint8_t direction = M_STOP;
 
-#define cornerQuotient 10
+#define cornerQuotient 2
 
 int lineFollowFlag = 10;
+
+int minFallbackSpeed = 255;
 
 void setup() {
 	led.setpin(13);
@@ -271,13 +273,13 @@ void right()
 	if (direction == M_FORWARD)
 	{
 		motor1.run(-runSpeed);
-		motor2.run(int(runSpeed / cornerQuotient));
+		motor2.run(-int(runSpeed / cornerQuotient));
 		return;
 	}
 	if (direction == M_BACKWARD)
 	{
 		motor1.run(runSpeed);
-		motor2.run(-int(runSpeed / cornerQuotient));
+		motor2.run(int(runSpeed / cornerQuotient));
 		return;
 	}
 	if (direction == M_STOP)
@@ -292,14 +294,14 @@ void left()
 {
 	if (direction == M_FORWARD)
 	{
-		motor1.run(-int(runSpeed / cornerQuotient));
+		motor1.run(int(runSpeed / cornerQuotient));
 		motor2.run(runSpeed);
 		return;
 	}
 
 	if (direction == M_BACKWARD)
 	{
-		motor1.run(int(runSpeed / cornerQuotient));
+		motor1.run(-int(runSpeed / cornerQuotient));
 		motor2.run(-runSpeed);
 		return;
 	}
@@ -331,10 +333,8 @@ void startButton() {
 
 	while (analogRead(7) > 100) {
 		delay(50);
-		Serial.print("Button Not Pressed");
 	}
 
-	Serial.print("Button Pressed");
 
 	for (int i = 0; i< 5; i++){
 		led.setColorAt(0, 0, 255, 0);
@@ -364,19 +364,30 @@ void followTheLine()
 	case S1_IN_S2_IN:
 		forward();
 		lineFollowFlag = 10;
+		if (runSpeed < 255) {
+			runSpeed++;
+		}
 		break;
 
 	case S1_IN_S2_OUT:
 		forward();
 		if (lineFollowFlag > 1) lineFollowFlag--;
+		
+		if (runSpeed < 255) {
+			runSpeed++;
+		}
 		break;
 
 	case S1_OUT_S2_IN:
 		forward();
 		if (lineFollowFlag < 20) lineFollowFlag++;
+		if (runSpeed < 255) {
+			runSpeed++;
+		}
 		break;
 
 	case S1_OUT_S2_OUT:
+		runSpeed = minFallbackSpeed;
 		if (lineFollowFlag == 10) backward();
 		if (lineFollowFlag < 10) left();
 		if (lineFollowFlag > 10) right();
