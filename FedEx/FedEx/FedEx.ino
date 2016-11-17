@@ -35,6 +35,7 @@ uint8_t direction = M_STOP;
 int lineFollowFlag = 10;
 
 int minFallbackSpeed = 205;
+bool crashed = false;
 
 #define NOTE_c 261 
 #define NOTE_d 294
@@ -84,19 +85,22 @@ void setup() {
 // the loop function runs over and over again until power down or reset
 void loop() {
 
-	startButton();
+  startButton();
 
-	while (true) {
-		//ledExample();
-		//irMovement();
-		
-		followTheLine();
-		//doNotCrash();
-	}
+  while (true) {
+    //ledExample();
+    //irMovement();
+    if (!crashed) {
+      followTheLine();
+    } else {
+      evade();
+    }
+    doNotCrash();
+  }
 
-	//buttonExample();
-	//lineFinderExample();
-  
+  //buttonExample();
+  //lineFinderExample();
+
 }
 
 
@@ -108,12 +112,12 @@ void ledExample()
 	delay(500);
 
 	led.setColorAt(0, 255, 0, 0); //Set LED0 (RGBLED1) (RightSide) to Red
-	led.setColorAt(1, 0, 0, 255); //Set LED1 (RGBLED2) (LeftSide)  to Blue
+	led.setColorAt(1, 0, 0, 255); //Set LED1 (RGBLED2) (LeftSide) ï¿½to Blue
 	led.show();
 	delay(500);
 
 	led.setColorAt(0, 0, 0, 255); //Set LED0 (RGBLED1) (RightSide) to Blue
-	led.setColorAt(1, 255, 0, 0); //Set LED1 (RGBLED2) (LeftSide)  to Red
+	led.setColorAt(1, 255, 0, 0); //Set LED1 (RGBLED2) (LeftSide) ï¿½to Red
 	led.show();
 	delay(500);
 }
@@ -122,11 +126,11 @@ void motorExample()
 {
 
 	//motor.run() maximum speed is 255 to -255, 0 is stop
-	motor1.run(-100); //Motor1 (Left)  forward is -negative
+	motor1.run(-100); //Motor1 (Left) ï¿½forward is -negative
 	motor2.run(100);	//Motor2 (Right) forward is +positive
 	delay(500);
 
-	motor1.run(100);	//Motor1 (Left)  backward is +positive
+	motor1.run(100);	//Motor1 (Left) ï¿½backward is +positive
 	motor2.run(-100); //Motor2 (Right) backward is -negative
 	delay(500);
 
@@ -313,18 +317,10 @@ void left()
 
 void doNotCrash()
 {
-	if (direction == M_FORWARD && ultrasonic.distanceCm() < 7)
-	{
-		stop();
-		left();
-		buzzer.tone(1000, 200);	//Buzzer sounds 1200Hz for 1000ms
-		backward();
-		stop();
-		delay(100);
-		right();
-		buzzer.tone(1000, 200);	//Buzzer sounds 1200Hz for 1000ms
-		stop();
-	}
+  if (direction == M_FORWARD && ultrasonic.distanceCm() < 10)
+  {
+    crashed = true;
+  }
 }
 
 void startButton() {
@@ -388,3 +384,30 @@ void followTheLine()
 		break;
 	}
 }
+
+void evadeleft() {
+  motor1.run(-50);
+  motor2.run(100);
+}
+
+void evade() {
+  stop();
+  right();
+  delay(250);
+  stop();
+  evadeleft();
+  while (crashed) {
+    uint8_t val;
+    val = lineFinder.readSensors();
+
+    switch (val) {
+      case S1_IN_S2_IN:
+      case S1_IN_S2_OUT:
+      case S1_OUT_S2_IN:
+        stop();
+        crashed = false;
+        break;
+    }
+  }
+}
+
