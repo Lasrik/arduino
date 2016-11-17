@@ -22,7 +22,7 @@ MeUltrasonicSensor ultrasonic(PORT_3);
 
 MeIR ir;
 
-int runSpeed = 100;
+int runSpeed = 170;
 
 #define M_FORWARD 1
 #define M_BACKWARD 2
