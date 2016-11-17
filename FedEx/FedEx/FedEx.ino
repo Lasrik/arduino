@@ -34,7 +34,7 @@ uint8_t direction = M_STOP;
 
 int lineFollowFlag = 10;
 
-int minFallbackSpeed = 255;
+int minFallbackSpeed = 205;
 
 #define  NOTE_c     3830    // 261 Hz 
 #define  NOTE_d     3400    // 294 Hz 
@@ -48,6 +48,8 @@ int minFallbackSpeed = 255;
 #define NOTE_E 659
 // Define a special note, 'R', to represent a rest
 #define NOTE_R 0
+
+int speedupQuotient = 0;
 
 
 void ov1812() {
@@ -89,7 +91,7 @@ void loop() {
 		//irMovement();
 		
 		followTheLine();
-		doNotCrash();
+		//doNotCrash();
 	}
 
 	//buttonExample();
@@ -299,47 +301,14 @@ void stop()
 
 void right()
 {
-	if (direction == M_FORWARD)
-	{
 		motor1.run(-runSpeed);
 		motor2.run(-int(runSpeed / cornerQuotient));
-		return;
-	}
-	if (direction == M_BACKWARD)
-	{
-		motor1.run(runSpeed);
-		motor2.run(int(runSpeed / cornerQuotient));
-		return;
-	}
-	if (direction == M_STOP)
-	{
-		motor1.run(-runSpeed);
-		motor2.run(-runSpeed);
-		return;
-	}
 }
 
 void left()
 {
-	if (direction == M_FORWARD)
-	{
 		motor1.run(int(runSpeed / cornerQuotient));
 		motor2.run(runSpeed);
-		return;
-	}
-
-	if (direction == M_BACKWARD)
-	{
-		motor1.run(-int(runSpeed / cornerQuotient));
-		motor2.run(-runSpeed);
-		return;
-	}
-	if (direction == M_STOP)
-	{
-		motor1.run(runSpeed);
-		motor2.run(runSpeed);
-		return;
-	}
 }
 
 void doNotCrash()
@@ -384,35 +353,31 @@ void startButton() {
 
 void followTheLine()
 {
-	uint8_t val;
-
-	val = lineFinder.readSensors();
-
+	if (runSpeed < 255) {
+		if (speedupQuotient % 4 == 0){
+			runSpeed++;
+			speedupQuotient = 0;
+		}
+		else {
+			speedupQuotient++;
+		}
+	}
+	uint8_t val = lineFinder.readSensors();
 	switch (val) {
 
 	case S1_IN_S2_IN:
 		forward();
 		lineFollowFlag = 10;
-		if (runSpeed < 255) {
-			runSpeed++;
-		}
 		break;
 
 	case S1_IN_S2_OUT:
 		forward();
 		if (lineFollowFlag > 1) lineFollowFlag--;
-		
-		if (runSpeed < 255) {
-			runSpeed++;
-		}
 		break;
 
 	case S1_OUT_S2_IN:
 		forward();
 		if (lineFollowFlag < 20) lineFollowFlag++;
-		if (runSpeed < 255) {
-			runSpeed++;
-		}
 		break;
 
 	case S1_OUT_S2_OUT:
