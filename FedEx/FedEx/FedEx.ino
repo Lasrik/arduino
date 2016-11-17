@@ -22,7 +22,7 @@ MeUltrasonicSensor ultrasonic(PORT_3);
 
 MeIR ir;
 
-int runSpeed = 50;
+int runSpeed = 70;
 
 #define M_FORWARD 1
 #define M_BACKWARD 2
@@ -30,11 +30,12 @@ int runSpeed = 50;
 
 uint8_t direction = M_STOP;
 
-#define cornerQuotient 2
+#define cornerQuotient 1.4
 
 int lineFollowFlag = 10;
 
-int minFallbackSpeed = 205;
+int minFallbackSpeed = 190;
+int minRunSpeed = 100;
 bool crashed = false;
 
 #define NOTE_c 261 
@@ -51,6 +52,9 @@ bool crashed = false;
 #define NOTE_R 0
 
 int speedupQuotient = 0;
+
+int fuzzyAmount = 16;
+int fuzzyCounter = 0;
 
 
 void ov1812() {
@@ -90,138 +94,17 @@ void loop() {
   while (true) {
     //ledExample();
     //irMovement();
+	
     if (!crashed) {
-      followTheLine();
+		followTheLine();
     } else {
       evade();
     }
     doNotCrash();
   }
 
-  //buttonExample();
-  //lineFinderExample();
-
 }
 
-
-
-void ledExample()
-{
-	led.setColor(255, 255, 255); //Set both LED to White
-	led.show();					//Must use .show() to make new colour take effect.
-	delay(500);
-
-	led.setColorAt(0, 255, 0, 0); //Set LED0 (RGBLED1) (RightSide) to Red
-	led.setColorAt(1, 0, 0, 255); //Set LED1 (RGBLED2) (LeftSide) �to Blue
-	led.show();
-	delay(500);
-
-	led.setColorAt(0, 0, 0, 255); //Set LED0 (RGBLED1) (RightSide) to Blue
-	led.setColorAt(1, 255, 0, 0); //Set LED1 (RGBLED2) (LeftSide) �to Red
-	led.show();
-	delay(500);
-}
-
-void motorExample()
-{
-
-	//motor.run() maximum speed is 255 to -255, 0 is stop
-	motor1.run(-100); //Motor1 (Left) �forward is -negative
-	motor2.run(100);	//Motor2 (Right) forward is +positive
-	delay(500);
-
-	motor1.run(100);	//Motor1 (Left) �backward is +positive
-	motor2.run(-100); //Motor2 (Right) backward is -negative
-	delay(500);
-
-	motor1.stop(); //Stop Motor1 
-	motor2.stop(); //Stop Motor1 
-	delay(500);
-}
-
-void buzzerExample() {
-	buzzer.tone(600, 1000);	//Buzzer sounds 600Hz for 1000ms
-	delay(2000);			//Pause for 2000ms, Buzzer no sound
-	buzzer.tone(1200, 1000);	//Buzzer sounds 1200Hz for 1000ms
-	delay(2000);	//Pause for 2000ms, Buzzer no sound
-}
-
-void lineFinderExample()
-{
-	int sensorState = lineFinder.readSensors();
-	switch (sensorState)
-	{
-	case S1_IN_S2_IN:	Serial.println("S1_IN_S2_IN"); break;
-	case S1_IN_S2_OUT:	Serial.println("S1_IN_S2_OUT"); break;
-	case S1_OUT_S2_IN:	Serial.println("S1_OUT_S2_IN"); break;
-	case S1_OUT_S2_OUT:	Serial.println("S1_OUT_S2_OUT"); break;
-	default: break;
-	}
-	delay(200);
-}
-
-void lightSensorExample()
-{
-	Serial.print("value = ");		// Print the results to the serial monitor
-	Serial.println(lightSensor.read());	// Brightness value from 0-1023
-	delay(50);						// Wait 50 milliseconds before next measurement
-}
-
-void ultrasonicExample()
-{
-	Serial.print("distance(cm) = ");	// Print the results to the serial monitor
-	Serial.println(ultrasonic.distanceCm());	// Distance value from 3cm - 400cm
-	delay(50);			// Wait 50 milliseconds before next measurement
-}
-
-void buttonExample() {
-	if (analogRead(7) < 100) {
-		Serial.println("Button Pressed");
-	}
-	else {
-		Serial.println("Not Pressed");
-	}
-	delay(50);
-}
-
-void irExample()
-{
-	if (ir.decode())
-	{
-		uint32_t value = ir.value;
-		Serial.print("Raw Value: ");
-		Serial.println(value);
-		value = value >> 16 & 0xff;
-		Serial.print("Button Code: ");
-		Serial.println(value);
-		Serial.print("Button: ");
-		switch (value)
-		{
-		case IR_BUTTON_A: Serial.println("A"); break;
-		case IR_BUTTON_B: Serial.println("B"); break;
-		case IR_BUTTON_C: Serial.println("C"); break;
-		case IR_BUTTON_D: Serial.println("D"); break;
-		case IR_BUTTON_E: Serial.println("E"); break;
-		case IR_BUTTON_F: Serial.println("F"); break;
-		case IR_BUTTON_SETTING: Serial.println("Setting"); break;
-		case IR_BUTTON_LEFT: Serial.println("Left"); break;
-		case IR_BUTTON_RIGHT: Serial.println("Right"); break;
-		case IR_BUTTON_UP: Serial.println("Up"); break;
-		case IR_BUTTON_DOWN: Serial.println("Down"); break;
-		case IR_BUTTON_0: Serial.println("0"); break;
-		case IR_BUTTON_1: Serial.println("1"); break;
-		case IR_BUTTON_2: Serial.println("2"); break;
-		case IR_BUTTON_3: Serial.println("3"); break;
-		case IR_BUTTON_4: Serial.println("4"); break;
-		case IR_BUTTON_5: Serial.println("5"); break;
-		case IR_BUTTON_6: Serial.println("6"); break;
-		case IR_BUTTON_7: Serial.println("7"); break;
-		case IR_BUTTON_8: Serial.println("8"); break;
-		case IR_BUTTON_9: Serial.println("9"); break;
-		default:break;
-		}
-	}
-}
 
 void irMovement()
 {
@@ -291,9 +174,10 @@ void forward()
 
 void backward()
 {
-	motor1.run(runSpeed);
-	motor2.run(-runSpeed);
+	motor1.run(minRunSpeed);
+	motor2.run(-minRunSpeed);
 	direction = M_BACKWARD;
+	runSpeed = minRunSpeed;
 }
 
 void stop()
@@ -349,7 +233,7 @@ void startButton() {
 void followTheLine()
 {
 	if (runSpeed < 255) {
-		if (speedupQuotient % 4 == 0){
+		if (speedupQuotient % 64 == 0){
 			runSpeed++;
 			speedupQuotient = 0;
 		}
@@ -377,7 +261,14 @@ void followTheLine()
 		break;
 
 	case S1_OUT_S2_OUT:
+		if (fuzzyCounter < fuzzyAmount) {
+			fuzzyCounter++;
+			return;
+		} 
+
+		fuzzyCounter = 0;
 		runSpeed = minFallbackSpeed;
+
 		if (lineFollowFlag == 10) backward();
 		if (lineFollowFlag < 10) left();
 		if (lineFollowFlag > 10) right();
