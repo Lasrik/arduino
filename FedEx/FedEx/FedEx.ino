@@ -36,13 +36,13 @@ int lineFollowFlag = 10;
 
 int minFallbackSpeed = 205;
 
-#define  NOTE_c     3830    // 261 Hz 
-#define  NOTE_d     3400    // 294 Hz 
-#define  NOTE_e     3038    // 329 Hz 
-#define  NOTE_f     2864    // 349 Hz 
+#define NOTE_c 261 
+#define NOTE_d 294
+#define NOTE_e 329
+#define NOTE_f 349 
 #define NOTE_g 392 
-#define  NOTE_a     2272    // 440 Hz 
-#define  NOTE_b     2028    // 493 Hz 
+#define NOTE_a 440 
+#define NOTE_b 493
 #define NOTE_C 523
 #define NOTE_D 587
 #define NOTE_E 659
@@ -333,7 +333,6 @@ void startButton() {
 		delay(50);
 	}
 
-
 	for (int i = 0; i< 5; i++){
 		led.setColorAt(0, 0, 255, 0);
 		led.setColorAt(1, 0, 255, 0);
@@ -362,6 +361,7 @@ void followTheLine()
 			speedupQuotient++;
 		}
 	}
+
 	uint8_t val = lineFinder.readSensors();
 	switch (val) {
 
@@ -386,6 +386,5 @@ void followTheLine()
 		if (lineFollowFlag < 10) left();
 		if (lineFollowFlag > 10) right();
 		break;
-
 	}
 }
