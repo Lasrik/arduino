@@ -36,17 +36,46 @@ int lineFollowFlag = 10;
 
 int minFallbackSpeed = 255;
 
+#define  NOTE_c     3830    // 261 Hz 
+#define  NOTE_d     3400    // 294 Hz 
+#define  NOTE_e     3038    // 329 Hz 
+#define  NOTE_f     2864    // 349 Hz 
+#define NOTE_g 392 
+#define  NOTE_a     2272    // 440 Hz 
+#define  NOTE_b     2028    // 493 Hz 
+#define NOTE_C 523
+#define NOTE_D 587
+#define NOTE_E 659
+// Define a special note, 'R', to represent a rest
+#define NOTE_R 0
+
+
+void ov1812() {
+	int eighth = 125;
+
+	buzzer.tone(NOTE_R, eighth);
+	buzzer.tone(NOTE_g, eighth);
+	buzzer.tone(NOTE_C, eighth);
+	buzzer.tone(NOTE_D, eighth);
+	buzzer.tone(NOTE_E, eighth);
+	buzzer.tone(NOTE_D, eighth);
+	buzzer.tone(NOTE_C, eighth);
+	buzzer.tone(NOTE_D, eighth);
+	buzzer.tone(NOTE_E, 2 * eighth);
+	buzzer.tone(NOTE_C, 2 * eighth);
+	buzzer.tone(NOTE_C, 4 * eighth);
+
+}
+
 void setup() {
 	led.setpin(13);
 	Serial.begin(9600);
 	pinMode(7, INPUT); //Define button pin as input
 	ir.begin();
-	buzzer.tone(1000, 200);
-	delay(100);
-	buzzer.tone(1000, 200);
 	led.setColorAt(0, 255, 0, 0);
 	led.setColorAt(1, 255, 0, 0);
 	led.show();
+	ov1812();
 }
 
 
