@@ -374,6 +374,11 @@ void evade() {
 
 void ir_irMovement()
 {
+  if(turnCounter == 4800) 
+  {
+    ir_forward();
+  }
+  
 	if (ir.decode())
 	{
 		uint32_t value = ir.value;
@@ -436,6 +441,7 @@ void ir_forward()
 	motor1.run(-runSpeed);
 	motor2.run(runSpeed);
 	direction = M_FORWARD;
+  turnCounter = 0;
 }
 
 void ir_backward()
@@ -443,6 +449,7 @@ void ir_backward()
 	motor1.run(runSpeed);
 	motor2.run(-runSpeed);
 	direction = M_BACKWARD;
+  turnCounter = 0;
 }
 
 void ir_stop()
@@ -450,6 +457,7 @@ void ir_stop()
 	motor1.run(0);
 	motor2.run(0);
 	direction = M_STOP;
+  turnCounter = 0;
 }
 
 void ir_right()
@@ -472,6 +480,7 @@ void ir_right()
 		motor2.run(-runSpeed / 2);
 		return;
 	}
+ turnCounter++;
 }
 
 void ir_left()
@@ -495,6 +504,7 @@ void ir_left()
 		motor2.run(runSpeed / 2);
 		return;
 	}
+ turnCounter++;
 }
 
 void ir_doNotCrash()
