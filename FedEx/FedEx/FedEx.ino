@@ -78,7 +78,6 @@ void setup() {
 	led.setpin(13);
 	Serial.begin(9600);
 	pinMode(7, INPUT); //Define button pin as input
-	ir.begin();
 	led.setColorAt(0, 255, 0, 0);
 	led.setColorAt(1, 255, 0, 0);
 	led.show();
