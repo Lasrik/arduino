@@ -36,13 +36,13 @@ int lineFollowFlag = 10;
 
 int maxRunSpeed = 200;
 int minFallbackSpeed = 150;
-int minRunSpeed = 100;
+int minRunSpeed = 70;
 bool crashed = false;
 
 int noLineCounter = 0;
-int noLineThreshhold = 1024;
-int spiralLeft = 255;
-int spiralRight = 255;
+int noLineThreshhold = 2048;
+int spiralLeft = -255;
+int spiralRight = -255;
 
 #define NOTE_c 261 
 #define NOTE_d 294
@@ -102,6 +102,7 @@ void loop() {
 	
 	if (noLineCounter > noLineThreshhold) {
 		spiral();
+		continue;
 	}
 
 
@@ -258,18 +259,19 @@ void followTheLine()
 		forward();
 		lineFollowFlag = 10;
 		noLineCounter = 0;
-
 		break;
 
     case S1_IN_S2_OUT:
       forward();
       if (lineFollowFlag > 1) lineFollowFlag--;
-      break;
+	  noLineCounter = 0;
+	  break;
 
     case S1_OUT_S2_IN:
       forward();
       if (lineFollowFlag < 20) lineFollowFlag++;
-      break;
+	  noLineCounter = 0;
+	  break;
 
 	case S1_OUT_S2_OUT:
 		noLineCounter++;
@@ -316,18 +318,28 @@ void evade() {
 }
 
 void spiral() {
+	
+	int counter = 0;
 
-	spiralRight--;
-	motor1.run(spiralLeft);
-	motor2.run(spiralRight);
+	while (true){
+		counter++;
 
-	uint8_t val = lineFinder.readSensors();
+		if (counter % 256 == 0){
+			spiralRight++;
+		}
+		motor1.run(spiralLeft);
+		motor2.run(spiralRight);
 
-	switch (val) {
-	case S1_IN_S2_IN:
-		int spiralLeft = 255;
-		int spiralRight = 255;
-		noLineCounter = 0;
+		uint8_t val = lineFinder.readSensors();
+
+		switch (val) {
+		case S1_IN_S2_IN:
+			spiralLeft = -255;
+			spiralRight = -255;
+			noLineCounter = 0;
+			return;
+			break;
+		}
 	}
 
 	
