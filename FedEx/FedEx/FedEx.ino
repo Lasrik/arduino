@@ -98,8 +98,9 @@ void loop() {
 
   while (true) {
     //ledExample();
-    //irMovement();
+    irMovement();
 	
+	/*
 	if (noLineCounter > noLineThreshhold) {
 		spiral();
 		continue;
@@ -111,7 +112,8 @@ void loop() {
     } else {
       evade();
     }
-    doNotCrash();
+	*/
+    doNotCrashRemote();
   }
 
 }
@@ -216,6 +218,14 @@ void doNotCrash()
   {
     crashed = true;
   }
+}
+
+void doNotCrashRemote()
+{
+	if (direction == M_FORWARD && ultrasonic.distanceCm() < 10)
+	{
+		stop();
+	}
 }
 
 void startButton() {
