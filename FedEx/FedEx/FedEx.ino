@@ -30,13 +30,19 @@ int runSpeed = 70;
 
 uint8_t direction = M_STOP;
 
-#define cornerQuotient 1.4
+#define cornerQuotient 1
 
 int lineFollowFlag = 10;
 
-int minFallbackSpeed = 190;
+int maxRunSpeed = 220;
+int minFallbackSpeed = 180;
 int minRunSpeed = 100;
 bool crashed = false;
+
+int noLineCounter = 0;
+int noLineThreshhold = 1024;
+int spiralLeft = 255;
+int spiralRight = 255;
 
 #define NOTE_c 261 
 #define NOTE_d 294
@@ -53,7 +59,7 @@ bool crashed = false;
 
 int speedupQuotient = 0;
 
-int fuzzyAmount = 16;
+int fuzzyAmount = 1;
 int fuzzyCounter = 0;
 
 
@@ -95,6 +101,11 @@ void loop() {
     //ledExample();
     //irMovement();
 	
+	if (noLineCounter > noLineThreshhold) {
+		spiral();
+	}
+
+
     if (!crashed) {
 		followTheLine();
     } else {
@@ -232,8 +243,8 @@ void startButton() {
 
 void followTheLine()
 {
-	if (runSpeed < 255) {
-		if (speedupQuotient % 64 == 0){
+	if (runSpeed < maxRunSpeed) {
+		if (speedupQuotient % 16 == 0){
 			runSpeed++;
 			speedupQuotient = 0;
 		}
@@ -248,6 +259,8 @@ void followTheLine()
 	case S1_IN_S2_IN:
 		forward();
 		lineFollowFlag = 10;
+		noLineCounter = 0;
+
 		break;
 
 	case S1_IN_S2_OUT:
@@ -261,6 +274,8 @@ void followTheLine()
 		break;
 
 	case S1_OUT_S2_OUT:
+		noLineCounter++;
+
 		if (fuzzyCounter < fuzzyAmount) {
 			fuzzyCounter++;
 			return;
@@ -277,8 +292,8 @@ void followTheLine()
 }
 
 void evadeleft() {
-  motor1.run(-50);
-  motor2.run(100);
+  motor1.run(-200);
+  motor2.run(250);
 }
 
 void evade() {
@@ -300,5 +315,23 @@ void evade() {
         break;
     }
   }
+}
+
+void spiral() {
+
+	spiralRight--;
+	motor1.run(spiralLeft);
+	motor2.run(spiralRight);
+
+	uint8_t val = lineFinder.readSensors();
+
+	switch (val) {
+	case S1_IN_S2_IN:
+		int spiralLeft = 255;
+		int spiralRight = 255;
+		noLineCounter = 0;
+	}
+
+	
 }
 
