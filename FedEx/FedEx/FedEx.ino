@@ -40,7 +40,7 @@ int minRunSpeed = 70;
 bool crashed = false;
 
 int noLineCounter = 0;
-int noLineThreshhold = 2048;
+int noLineThreshhold = 7500;
 int spiralLeft = -255;
 int spiralRight = -255;
 
