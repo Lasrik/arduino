@@ -62,6 +62,7 @@ int turnCounter = 0;
 
 boolean automatic = true;
 
+#define ir_cornerQuotient 2.5
 
 void ov1812() {
   int eighth = 125;
@@ -106,6 +107,12 @@ void loop() {
 	  doNotCrash();
 	  checkButton();
   }
+
+  runSpeed = 150;
+  stop();
+
+  direction = M_STOP;
+
   while(true){
 	ir_irMovement();
 	ir_doNotCrash();
@@ -450,13 +457,13 @@ void ir_right()
 	if (direction == M_FORWARD)
 	{
 		motor1.run(-runSpeed);
-		motor2.run(int(runSpeed / cornerQuotient));
+		motor2.run(int(runSpeed / ir_cornerQuotient));
 		return;
 	}
 	if (direction == M_BACKWARD)
 	{
 		motor1.run(runSpeed);
-		motor2.run(-int(runSpeed / cornerQuotient));
+		motor2.run(-int(runSpeed / ir_cornerQuotient));
 		return;
 	}
 	if (direction == M_STOP)
@@ -471,14 +478,14 @@ void ir_left()
 {
 	if (direction == M_FORWARD)
 	{
-		motor1.run(-int(runSpeed / cornerQuotient));
+		motor1.run(-int(runSpeed / ir_cornerQuotient));
 		motor2.run(runSpeed);
 		return;
 	}
 
 	if (direction == M_BACKWARD)
 	{
-		motor1.run(int(runSpeed / cornerQuotient));
+		motor1.run(int(runSpeed / ir_cornerQuotient));
 		motor2.run(-runSpeed);
 		return;
 	}
