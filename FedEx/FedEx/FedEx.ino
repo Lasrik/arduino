@@ -39,10 +39,6 @@ int minFallbackSpeed = 150;
 int minRunSpeed = 70;
 bool crashed = false;
 
-int noLineCounter = 0;
-int noLineThreshhold = 7500;
-int spiralLeft = -255;
-int spiralRight = -255;
 
 #define NOTE_c 261 
 #define NOTE_d 294
@@ -97,23 +93,16 @@ void loop() {
   startButton();
 
   while (true) {
-    //ledExample();
-    irMovement();
+    
 	
-	/*
-	if (noLineCounter > noLineThreshhold) {
-		spiral();
-		continue;
-	}
-
 
     if (!crashed) {
       followTheLine();
     } else {
       evade();
     }
-	*/
-    doNotCrashRemote();
+	
+	doNotCrashRemote();
   }
 
 }
@@ -268,24 +257,20 @@ void followTheLine()
 	case S1_IN_S2_IN:
 		forward();
 		lineFollowFlag = 10;
-		noLineCounter = 0;
 		break;
 
     case S1_IN_S2_OUT:
       forward();
       if (lineFollowFlag > 1) lineFollowFlag--;
-	  noLineCounter = 0;
 	  break;
 
     case S1_OUT_S2_IN:
       forward();
       if (lineFollowFlag < 20) lineFollowFlag++;
-	  noLineCounter = 0;
 	  break;
 
 	case S1_OUT_S2_OUT:
-		noLineCounter++;
-
+		
 		if (fuzzyCounter < fuzzyAmount) {
 			fuzzyCounter++;
 			return;
@@ -326,32 +311,3 @@ void evade() {
     }
   }
 }
-
-void spiral() {
-	
-	int counter = 0;
-
-	while (true){
-		counter++;
-
-		if (counter % 256 == 0){
-			spiralRight++;
-		}
-		motor1.run(spiralLeft);
-		motor2.run(spiralRight);
-
-		uint8_t val = lineFinder.readSensors();
-
-		switch (val) {
-		case S1_IN_S2_IN:
-			spiralLeft = -255;
-			spiralRight = -255;
-			noLineCounter = 0;
-			return;
-			break;
-		}
-	}
-
-	
-}
-
