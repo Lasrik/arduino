@@ -30,21 +30,15 @@ int runSpeed = 70;
 
 uint8_t direction = M_STOP;
 
-#define cornerQuotient 1
+#define cornerQuotient 1.4
 
 int lineFollowFlag = 10;
 
-int maxRunSpeed = 220;
-int minFallbackSpeed = 180;
+int minFallbackSpeed = 190;
 int minRunSpeed = 100;
 bool crashed = false;
 
-int noLineCounter = 0;
-int noLineThreshhold = 1024;
-int spiralLeft = 255;
-int spiralRight = 255;
-
-#define NOTE_c 261 
+#define NOTE_c 261
 #define NOTE_d 294
 #define NOTE_e 329
 #define NOTE_f 349
@@ -59,7 +53,7 @@ int spiralRight = 255;
 
 int speedupQuotient = 0;
 
-int fuzzyAmount = 1;
+int fuzzyAmount = 16;
 int fuzzyCounter = 0;
 
 
@@ -97,14 +91,6 @@ void loop() {
   startButton();
 
   while (true) {
-    //ledExample();
-    //irMovement();
-	
-	if (noLineCounter > noLineThreshhold) {
-		spiral();
-	}
-
-
     if (!crashed) {
       followTheLine();
     } else {
@@ -241,25 +227,23 @@ void startButton() {
 
 void followTheLine()
 {
-	if (runSpeed < maxRunSpeed) {
-		if (speedupQuotient % 16 == 0){
-			runSpeed++;
-			speedupQuotient = 0;
-		}
-		else {
-			speedupQuotient++;
-		}
-	}
+  if (runSpeed < 255) {
+    if (speedupQuotient % 64 == 0) {
+      runSpeed++;
+      speedupQuotient = 0;
+    }
+    else {
+      speedupQuotient++;
+    }
+  }
 
   uint8_t val = lineFinder.readSensors();
   switch (val) {
 
-	case S1_IN_S2_IN:
-		forward();
-		lineFollowFlag = 10;
-		noLineCounter = 0;
-
-		break;
+    case S1_IN_S2_IN:
+      forward();
+      lineFollowFlag = 10;
+      break;
 
     case S1_IN_S2_OUT:
       forward();
@@ -271,13 +255,11 @@ void followTheLine()
       if (lineFollowFlag < 20) lineFollowFlag++;
       break;
 
-	case S1_OUT_S2_OUT:
-		noLineCounter++;
-
-		if (fuzzyCounter < fuzzyAmount) {
-			fuzzyCounter++;
-			return;
-		} 
+    case S1_OUT_S2_OUT:
+      if (fuzzyCounter < fuzzyAmount) {
+        fuzzyCounter++;
+        return;
+      }
 
       fuzzyCounter = 0;
       runSpeed = minFallbackSpeed;
@@ -290,8 +272,8 @@ void followTheLine()
 }
 
 void evadeleft() {
-  motor1.run(-200);
-  motor2.run(250);
+  motor1.run(-50);
+  motor2.run(100);
 }
 
 void evade() {
@@ -313,23 +295,5 @@ void evade() {
         break;
     }
   }
-}
-
-void spiral() {
-
-	spiralRight--;
-	motor1.run(spiralLeft);
-	motor2.run(spiralRight);
-
-	uint8_t val = lineFinder.readSensors();
-
-	switch (val) {
-	case S1_IN_S2_IN:
-		int spiralLeft = 255;
-		int spiralRight = 255;
-		noLineCounter = 0;
-	}
-
-	
 }
 
