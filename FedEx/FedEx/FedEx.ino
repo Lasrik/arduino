@@ -95,16 +95,14 @@ void loop() {
   startButton();
 
   while (true) {
-	
-	
+
     if (!crashed) {
       followTheLine();
     } else {
       evade();
     }
-
-	
-	doNotCrash();
+    
+	  doNotCrash();
   }
 
 }
@@ -300,27 +298,51 @@ void followTheLine()
 }
 
 void evadeleft() {
-  motor1.run(-200);
-  motor2.run(250);
+  motor1.run(90);
+  motor2.run(125);
+/*
+  motor1.run(int(runSpeed / cornerQuotient));
+  motor2.run(runSpeed);
+*/ 
+  delay(150);
+}
+
+void evaderight() {
+  motor1.run(-90);
+  motor2.run(-90);
+  delay(250);
+}
+
+void evadeforward() {
+  motor1.run(-125);
+  motor2.run(125);
+  direction = M_FORWARD;
+  delay(250);
 }
 
 void evade() {
-  stop();
-  right();
-  delay(250);
-  stop();
-  evadeleft();
-  while (crashed) {
-    uint8_t val;
-    val = lineFinder.readSensors();
-
-    switch (val) {
-      case S1_IN_S2_IN:
-      case S1_IN_S2_OUT:
-      case S1_OUT_S2_IN:
-        stop();
-        crashed = false;
+ stop();
+ while (crashed) {
+    while(ultrasonic.distanceCm() < 7) {
+      evaderight();
+    }
+    evaderight();
+    stop();
+    while (true) {
+      evadeforward();
+      evadeleft();
+      if (ultrasonic.distanceCm() < 7) {
         break;
+      }
+
+      switch (lineFinder.readSensors()) {
+        case S1_IN_S2_IN:
+        case S1_IN_S2_OUT:
+        case S1_OUT_S2_IN:
+          stop();
+          crashed = false;
+          return;
+      }
     }
   }
 }
