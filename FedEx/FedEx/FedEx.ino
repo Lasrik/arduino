@@ -58,6 +58,8 @@ int speedupQuotient = 0;
 int fuzzyAmount = 1;
 int fuzzyCounter = 0;
 
+int turnCounter = 0;
+
 
 void ov1812() {
   int eighth = 125;
@@ -93,16 +95,16 @@ void loop() {
   startButton();
 
   while (true) {
-    
 	
-
+	
     if (!crashed) {
       followTheLine();
     } else {
       evade();
     }
+
 	
-	doNotCrashRemote();
+	doNotCrash();
   }
 
 }
@@ -172,6 +174,7 @@ void forward()
   motor1.run(-runSpeed);
   motor2.run(runSpeed);
   direction = M_FORWARD;
+  turnCounter = 0;
 }
 
 void backward()
@@ -193,12 +196,14 @@ void right()
 {
   motor1.run(-runSpeed);
   motor2.run(-int(runSpeed / cornerQuotient));
+  turnCounter++;
 }
 
 void left()
 {
   motor1.run(int(runSpeed / cornerQuotient));
   motor2.run(runSpeed);
+  turnCounter++;
 }
 
 void doNotCrash()
@@ -209,13 +214,6 @@ void doNotCrash()
   }
 }
 
-void doNotCrashRemote()
-{
-	if (direction == M_FORWARD && ultrasonic.distanceCm() < 10)
-	{
-		stop();
-	}
-}
 
 void startButton() {
   while (analogRead(7) > 100) {
@@ -270,18 +268,33 @@ void followTheLine()
 	  break;
 
 	case S1_OUT_S2_OUT:
-		
+	
+		/*
 		if (fuzzyCounter < fuzzyAmount) {
 			fuzzyCounter++;
 			return;
 		} 
+		*/
 
       fuzzyCounter = 0;
       runSpeed = minFallbackSpeed;
 
+	  
+		  left();
+		
+
       if (lineFollowFlag == 10) backward();
-      if (lineFollowFlag < 10) left();
-      if (lineFollowFlag > 10) right();
+	  
+	  if (turnCounter < 220) {
+			if (lineFollowFlag < 10) left();
+			if (lineFollowFlag > 10) right();
+			delay(5);
+	  }
+	  else {
+		  turnCounter = -turnCounter;
+		  lineFollowFlag = 20 - lineFollowFlag;
+		  stop();
+	  }
       break;
   }
 }
