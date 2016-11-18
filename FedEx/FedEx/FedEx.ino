@@ -34,8 +34,8 @@ uint8_t direction = M_STOP;
 
 int lineFollowFlag = 10;
 
-int maxRunSpeed = 220;
-int minFallbackSpeed = 180;
+int maxRunSpeed = 200;
+int minFallbackSpeed = 150;
 int minRunSpeed = 100;
 bool crashed = false;
 
